@@ -1,0 +1,3 @@
+# Gross-Pitaevskii 
+
+GPE solver.
