@@ -1,0 +1,37 @@
+function Assemble_S(Nodes::Array{Float64,1},Simplices::Array{Int64,2},Mesh2Space::Array{Int64,1},SpaceSize::Int64)
+
+    S = spzeros(SpaceSize,SpaceSize)
+
+    d = size(Simplices,1)
+
+    N = size(Simplices,2)
+
+    for i = 1:N
+
+        Simplex = Simplices[:,i]
+
+        Element_Nodes = Nodes[Simplex]
+
+        loc = Assemble_Element_S(Element_Nodes) # Calculate Element matrix, integrated exactly with Gaussian quadrature.
+
+        idx = Mesh2Space[Simplex]
+
+        for j = 1:d
+
+            for k = 1:d
+
+                if (idx[j]!=0) & (idx[k]!=0)
+
+                    S[idx[j],idx[k]] =  S[idx[j],idx[k]]+loc[j,k]
+
+                end
+
+            end
+
+        end
+
+    end
+
+    return S
+
+end
