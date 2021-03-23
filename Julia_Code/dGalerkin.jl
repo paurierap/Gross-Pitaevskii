@@ -1,4 +1,4 @@
-function dGalerkin(M,A,Time_Simplices::Array{Float64,2},u0::Array{Float64,1},Nodes,Simplices,Mesh2Space,SpaceSize,k::Int64,β)
+function dGalerkin(M,S,Time_Simplices::Array{Float64,2},u0::Array{Float64,1},Nodes,Simplices,Mesh2Space,SpaceSize,k::Int64,β)
 
     # dG(k) method with k order of Legendre polynomial.
 
@@ -45,10 +45,19 @@ function dGalerkin(M,A,Time_Simplices::Array{Float64,2},u0::Array{Float64,1},Nod
 
         end
 
-        u[:,j+1] = Fixed_Point(β,b,u[:,j],B,Nodes,Simplices,Mesh2Space,SpaceSize,k,τ)
+        A_matrix = copy(A) # A needs to be copied otherwise its values are changed.
 
-        mass[j] = mass_integration(u[:,j+1],Nodes,Simplices)
-        energy[j] = energy_integration(β,u[:,j+1],Nodes,Simplices)
+        coeffs = Fixed_Point(β,b,coeffs,A,Nodes,Simplices,Mesh2Space,SpaceSize,k,r,Time_Simplices[:,j]) # Solve for the coefficients in the iterative solver.
+
+        A = A_matrix
+
+        fill!(u,0)
+
+        for i = 0:k
+
+            u += sqrt((2*i+1)/τ)*coeffs[i*SpaceSize+1:(i+1)*SpaceSize] # Recover actual solution from coefficients.
+
+        end
 
     end
 

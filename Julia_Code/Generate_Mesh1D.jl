@@ -6,12 +6,12 @@ x_left = -20.
 x_right = 20.
 
 t_start = 0
-t_end = 30
+t_end = 5
 
-d = 1 # Order of FEM basis functions.
+d = 4 # Order of FEM basis functions.
 
-N_x = 2^6
-N_t = 2^19
+N_x = 2^8
+N_t = 2^7
 
 Nodes_t = Array(LinRange(t_start,t_end,N_t+1)) # Time nodes equispaced over [0,1]
 

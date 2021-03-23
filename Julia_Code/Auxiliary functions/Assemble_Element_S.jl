@@ -13,23 +13,13 @@ function Assemble_Element_S(Nodes::Array{Float64,1})
     L = LagDerivative(Nodes,x) # L has size (d,d).
 
     for i = 1:d
-
         for j = i:d
-
             for k = 1:d
-
-                S[i,j] += ω[k]*L[k,i]*L[k,j]
-
+                S[i,j] += 0.5*h*ω[k]*L[k,i]*L[k,j]
             end
-
-            S[i,j] *= 0.5*h
-
             S[j,i] = S[i,j]
-
         end
-
     end
 
     return S
-
 end

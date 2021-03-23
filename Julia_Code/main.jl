@@ -8,13 +8,13 @@ using LinearAlgebra, SparseArrays, JLD
 
 include("LoadCode.jl")
 
-left_boundary = -20.
-right_boundary = 20.
-β = -2.
+const left_boundary = -20.
+const right_boundary = 20.
+const β = -2.
 
-Nx = 2^6
+Nx = 2^7
 Nt = 2^14
-d = 1
+d = 2
 
 bw = load("1dMesh_"*string(Nx)*"x"*string(Nt)*"_P"*string(d)*".jld")
 Nodes = bw["Nodes"]
@@ -36,18 +36,11 @@ M = Assemble_M(Nodes,Simplices,Mesh2Space,SpaceSize)
 
 x = Nodes[2:end-1] # Mesh without first and last nodes.
 
-u0 = (8*(9*exp.(-4*x)+16*exp.(4*x))-32*(4*exp.(-2*x)+9*exp.(2*x)))./(-128 .+4*exp.(-6*x)+16*exp.(6*x)+81*exp.(-2*x)+64*exp.(2*x)) # Initial condition.
+u0 = complex(float((8*(9*exp.(-4*x)+16*exp.(4*x))-32*(4*exp.(-2*x)+9*exp.(2*x)))./(-128 .+4*exp.(-6*x)+16*exp.(6*x)+81*exp.(-2*x)+64*exp.(2*x)))) # Initial condition.
 
 k = 4 # G_r(k).
 r = 3
 
 u,mass,energy = Gr(M,S,Time_Simplices,u0,Nodes,Simplices,Mesh2Space,SpaceSize,k,r,β)
 
-# Exact solution u(x,t):
-
-# sol(x,t) = (8*exp(4im*t)*(9*exp.(-4*x)+16*exp.(4*x))-32*exp(16im*t)*(4*exp.(-2*x)+9*exp.(2*x)))./(-128*cos(12*t) .+4*exp.(-6*x)+16*exp.(6*x)+81*exp.(-2*x)+64*exp.(2*x))
-
 save("sol_file_"*string(Nx)*"x"*string(Nt)*"_k"*string(k)*"_r"*string(r)*"_P"*string(size(Simplices,1)-1)*".jld","u",u, "mass",mass,"energy",energy)
-
-#p = plot(x,abs.(u))
-#plot!(x,abs.(sol),linestyle = :dash)
