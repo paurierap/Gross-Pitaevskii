@@ -2,9 +2,7 @@ function Assemble_M(Nodes::Array{Float64,1},Simplices::Array{Int64,2},Mesh2Space
 
     M = spzeros(SpaceSize,SpaceSize)
 
-    d = size(Simplices,1)
-
-    N = size(Simplices,2)
+    d,N = size(Simplices)
 
     for i = 1:N
 
@@ -17,21 +15,13 @@ function Assemble_M(Nodes::Array{Float64,1},Simplices::Array{Int64,2},Mesh2Space
         idx = Mesh2Space[Simplex]
 
         for j = 1:d
-
             for k = 1:d
-
-                if (idx[j]!=0) & (idx[k]!=0)
-
-                    M[idx[j],idx[k]] =  M[idx[j],idx[k]]+loc[j,k]
-
+                if idx[j]!=0 && idx[k]!=0
+                    M[idx[j],idx[k]] += loc[j,k]
                 end
-
             end
-
         end
-
     end
 
     return M
-
 end
