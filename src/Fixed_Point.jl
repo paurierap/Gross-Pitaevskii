@@ -6,86 +6,56 @@ function Fixed_Point(β::Float64,b::Array{ComplexF64,1},x_0::Array{ComplexF64,1}
 
     τ = abs(In[2]-In[1]) # timestep.
 
-    if r == 1  #cGP(k)
+    D0 = floor(Int,0.5*(r-1))
+    D1 = floor(Int,0.5*r)
 
-        while Δx > 1e-12
+    while Δx > 1e-9
 
-            x_n = copy(x_next)
+        x_n = copy(x_next)
 
-            C = copy(A)
+        C = copy(A)
 
-            for i = 0:(k-1)
-                for j = 0:k
-                    A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*Integrate_Γ(x_n,i,j,k,In,Nodes,Simplices,Mesh2Space,SpaceSize)
-                end
+        # In the local problem, the matrix Γ needs to be integrated:
+
+        for i = 0:(k-r)
+            for j = 0:k
+                A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*Integrate_Γ(x_n,i,j,k,In,Nodes,Simplices,Mesh2Space,SpaceSize)
             end
-
-            SparseArrays.fkeep!(A, (i,j,x) -> abs(x) > eps)
-
-            x_next = A\b;
-
-            it += 1
-
-            Δx = norm(x_next-x_n)
-
-            A = C
-
         end
 
-    else  #G_r(k)
+        # Finally, continuity conditions on the derivatives depending on D0 and D1, where Γ is NOT integrated:
 
-        D0 = floor(Int,0.5*(r-1))
-        D1 = floor(Int,0.5*r)
-
-        while Δx > 1e-9
-
-            x_n = copy(x_next)
-
-            C = copy(A)
-
-            # In the local problem, the matrix Γ needs to be integrated:
-
-            for i = 0:(k-r)
-                for j = 0:k
-                    A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*Integrate_Γ(x_n,i,j,k,In,Nodes,Simplices,Mesh2Space,SpaceSize)
+        for q = 1:D0
+            i = k-r+1+q
+            side = "left"
+            for j = 0:k
+                for α = 0:(q-1)
+                    A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*binomial(q-1,α)*LegDerivative(α,j,τ,side)*Derivative_Γ(q-1-α,k,τ,x_n,Nodes,Simplices,Mesh2Space,SpaceSize,side)
                 end
             end
-
-            # Finally, continuity conditions on the derivatives depending on D0 and D1, where Γ is NOT integrated:
-
-            for q = 1:D0
-                i = k-r+1+q
-                side = "left"
-                for j = 0:k
-                    for α = 0:(q-1)
-                        A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*binomial(q-1,α)*LegDerivative(α,j,τ,side)*Derivative_Γ(q-1-α,k,τ,x_n,Nodes,Simplices,Mesh2Space,SpaceSize,side)
-                    end
-                end
-            end
-
-            for q = 1:D1
-                i = k-r+1+q+D0
-                side = "right"
-                for j = 0:k
-                    for α = 0:(q-1)
-                        A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*binomial(q-1,α)*LegDerivative(α,j,τ,side)*Derivative_Γ(q-1-α,k,τ,x_n,Nodes,Simplices,Mesh2Space,SpaceSize,side)
-                    end
-                end
-            end
-            
-            #SparseArrays.fkeep!(A, (i,j,x) -> abs(x) > 1e-14)
-
-            x_next = A\b; # Solve to get the Legendre coefficients to later check convergence.
-
-            Δx = norm(x_next-x_n)
-
-            A = C
-
         end
 
-        # Usually converges in 6-8 iterations!
+        for q = 1:D1
+            i = k-r+1+q+D0
+            side = "right"
+            for j = 0:k
+                for α = 0:(q-1)
+                    A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*binomial(q-1,α)*LegDerivative(α,j,τ,side)*Derivative_Γ(q-1-α,k,τ,x_n,Nodes,Simplices,Mesh2Space,SpaceSize,side)
+                end
+            end
+        end
+        
+        #SparseArrays.fkeep!(A, (i,j,x) -> abs(x) > 1e-14)
+
+        x_next = A\b; # Solve to get the Legendre coefficients to later check convergence.
+
+        Δx = norm(x_next-x_n)
+
+        A = C
 
     end
+
+    # Usually converges in 6-8 iterations!
 
     return x_next
 end

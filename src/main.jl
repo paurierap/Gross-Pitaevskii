@@ -39,7 +39,7 @@ x = Nodes[2:end-1] # Mesh without first and last nodes.
 u0 = complex(float((8*(9*exp.(-4*x)+16*exp.(4*x))-32*(4*exp.(-2*x)+9*exp.(2*x)))./(-128 .+4*exp.(-6*x)+16*exp.(6*x)+81*exp.(-2*x)+64*exp.(2*x)))) # Initial condition.
 
 k = 4 # G_r(k).
-r = 3
+r = 1
 
 u,mass,energy = Gr(M,S,Time_Simplices,u0,Nodes,Simplices,Mesh2Space,SpaceSize,k,r,β)
 

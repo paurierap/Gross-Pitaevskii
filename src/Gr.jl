@@ -2,12 +2,8 @@ function Gr(M::SparseMatrixCSC{Float64,Int64},S::SparseMatrixCSC{Float64,Int64},
 
     # G_r(k) method with k order of Legendre polynomial.
 
-    if r < 0 || r > k
-        error("r must be such that 0 <= r <= k.")
-    elseif r == 0     # r = 0 is equivalent to dG(k).
-        return dGalerkin(M,S,Time_Simplices,u0,Nodes,Simplices,Mesh2Space,SpaceSize,k,β)
-    elseif r == 1     # r = 1 is equivalent to cGP(k).
-        return cGP(M,S,Time_Simplices,u0,Nodes,Simplices,Mesh2Space,SpaceSize,k,β)
+    if r < 1 || r > k
+        error("r must be such that 0 < r <= k.")
     end
 
     N = size(Time_Simplices,2)

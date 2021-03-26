@@ -10,8 +10,8 @@ t_end = 5
 
 d = 4 # Order of FEM basis functions.
 
-N_x = 2^8
-N_t = 2^7
+N_x = 2^6
+N_t = 2^11
 
 Nodes_t = Array(LinRange(t_start,t_end,N_t+1)) # Time nodes equispaced over [0,1]
 
