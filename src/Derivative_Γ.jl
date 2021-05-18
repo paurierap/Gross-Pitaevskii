@@ -27,14 +27,14 @@ function Derivative_Γ(q::Int64,k::Int64,τ::Float64,coeffs::Array{ComplexF64,1}
 
     for s = 0:k
         for p = 0:k
-            prod = coeffs[p*SpaceSize+1:(p+1)*SpaceSize].*coeffs[s*SpaceSize+1:(s+1)*SpaceSize]
+            prod = imag.(coeffs[p*SpaceSize+1:(p+1)*SpaceSize]).*imag.(coeffs[s*SpaceSize+1:(s+1)*SpaceSize])+real.(coeffs[p*SpaceSize+1:(p+1)*SpaceSize]).*real.(coeffs[s*SpaceSize+1:(s+1)*SpaceSize])
             for l = 0:q
                 u += binomial(q,l)*LegDerivative(q-l,s,τ,side)*LegDerivative(l,p,τ,side)*prod
             end
         end
     end
 
-    u = vcat(0,u,0)
+    u = vcat(0im,u,0im)
 
     for i = 1:N
 
@@ -43,8 +43,10 @@ function Derivative_Γ(q::Int64,k::Int64,τ::Float64,coeffs::Array{ComplexF64,1}
         Element_Nodes = Nodes[Simplex]
         u_τ = u[Simplex]
 
-        h = abs(Element_Nodes[end]-Element_Nodes[1])
-        x = h*0.5*ξ.+0.5*(Element_Nodes[end]+Element_Nodes[1])
+        a = Element_Nodes[1]; b = Element_Nodes[end];
+
+        h = abs(b-a)
+        x = h*0.5*ξ.+0.5*(a+b)
 
         fill!(int,0)
         fill!(V,1)
@@ -65,8 +67,7 @@ function Derivative_Γ(q::Int64,k::Int64,τ::Float64,coeffs::Array{ComplexF64,1}
             end
         end
 
-        u_τ = u[Simplex[1]]*(1/h*(b.-x)).^2 + cross/h.*(b.-x)/h.*(x.-a) + u[Simplex[2]]*(1/h*(x.-a)).^2
-        =#
+        u_τ = u[Simplex[1]]*(1/h*(b.-x)).^2 + cross/h.*(b.-x)/h.*(x.-a) + u[Simplex[2]]*(1/h*(x.-a)).^2 =#
 
         φ = X*(V\Id) # Basis functions.
 

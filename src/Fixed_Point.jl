@@ -22,7 +22,7 @@ function Fixed_Point(β::Float64,b::Array{ComplexF64,1},x_0::Array{ComplexF64,1}
                 A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*Integrate_Γ(x_n,i,j,k,In,Nodes,Simplices,Mesh2Space,SpaceSize)
             end
         end
-
+       
         # Finally, continuity conditions on the derivatives depending on D0 and D1, where Γ is NOT integrated:
 
         for q = 1:D0
@@ -34,7 +34,7 @@ function Fixed_Point(β::Float64,b::Array{ComplexF64,1},x_0::Array{ComplexF64,1}
                 end
             end
         end
-
+        
         for q = 1:D1
             i = k-r+1+q+D0
             side = "right"
@@ -43,7 +43,7 @@ function Fixed_Point(β::Float64,b::Array{ComplexF64,1},x_0::Array{ComplexF64,1}
                     A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= β*binomial(q-1,α)*LegDerivative(α,j,τ,side)*Derivative_Γ(q-1-α,k,τ,x_n,Nodes,Simplices,Mesh2Space,SpaceSize,side)
                 end
             end
-        end
+        end 
         
         #SparseArrays.fkeep!(A, (i,j,x) -> abs(x) > 1e-14)
 

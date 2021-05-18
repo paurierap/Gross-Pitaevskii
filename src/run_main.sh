@@ -6,7 +6,8 @@
 #SBATCH -t 24:00:00
 # Request mail when job starts and ends
 #SBATCH --mail-type=END
+#SBATCH -C Haswell
 # load Julia compiler.
-module add julialang/1.0.1
+module load julialang/1.5.4-haswell
 # Run program
 julia main.jl

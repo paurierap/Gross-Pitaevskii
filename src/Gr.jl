@@ -34,7 +34,7 @@ function Gr(M::SparseMatrixCSC{Float64,Int64},S::SparseMatrixCSC{Float64,Int64},
             if i == j
                 A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] -= S # orthonormality.
             elseif ismult(i,j-1)
-                A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] += 2*sqrt((2*i+1)*(2*j+1))/τ*M*im
+                A[i*SpaceSize+1:(i+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] += (2/τ)*sqrt((2*i+1)*(2*j+1))*M*im
             end
         end
     end
@@ -42,10 +42,10 @@ function Gr(M::SparseMatrixCSC{Float64,Int64},S::SparseMatrixCSC{Float64,Int64},
     # Now, continuity conditions at the beginning of each interval:
 
     for j = 0:k
-        A[(k-r+1)*SpaceSize+1:((k-r+1)+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] += sqrt((2*j+1)/τ)*(-1)^j*Id
+        A[(k-r+1)*SpaceSize+1:((k-r+1)+1)*SpaceSize,j*SpaceSize+1:(j+1)*SpaceSize] += (-1)^j*sqrt((2*j+1)/τ)*Id
     end
 
-    # Finally, continuity conditions on the derivatives depending on D0 and D1:
+    #Finally, continuity conditions on the derivatives depending on D0 and D1:
 
     for q = 1:D0
         i = k-r+1+q
@@ -65,8 +65,8 @@ function Gr(M::SparseMatrixCSC{Float64,Int64},S::SparseMatrixCSC{Float64,Int64},
 
     # Let the magic begin:
 
-    for j = 1:N
-
+    #for j in ProgressBar(1:N)
+    for j = 1:N   
         if D0 == D1
             b = vcat(zeros((k-r+1)*SpaceSize),u,zeros(2*D1*SpaceSize))
         else
@@ -87,6 +87,7 @@ function Gr(M::SparseMatrixCSC{Float64,Int64},S::SparseMatrixCSC{Float64,Int64},
 
         mass[j+1] = mass_integration(u,Nodes,Simplices) # Find the mass at that time.
         energy[j+1] = energy_integration(β,u,Nodes,Simplices) # Find the energy at that time.
+        println(energy[j+1])
     end
 
     # Matrix with all continuous derivatives:
