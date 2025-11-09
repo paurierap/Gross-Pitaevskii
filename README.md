@@ -8,7 +8,7 @@
 
 ## Usage
 
-To run, create a spatial mesh using `Generate_Mesh1D.jl, which also provides a time discretization for $(0,T]$ given in a `.jld` file. Then run `main.jl`, which solves the GPE with $\beta=-2$, providing a `.jld` file with the approximate solution at $t=T$, along with the values of the discretized energy and mass. 
+To run, create a spatial mesh using `Generate_Mesh1D.jl`, which also provides a time discretization for $(0,T]$ given in a `.jld` file. Then run `main.jl`, which solves the GPE with $\beta=-2$, providing a `.jld` file with the approximate solution at $t=T$, along with the values of the discretized energy and mass. 
 
 ## References
 <a id="1">[1]</a>
