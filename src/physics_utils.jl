@@ -25,9 +25,8 @@ function quantity_integration(β::Float64, u::Vector{ComplexF64}, nodes::Vector{
     # Extend solution for homogeneous Dirichlet BCs
     u = vcat(0.0 + 0im, u, 0.0 + 0im)
 
-    # 5-point Gauss quadrature
-    ξ = Quad_5.x
-    ω = Quad_5.w
+    # The quartic energy integrand has degree 4d on each element.
+    ξ, ω = gauss_legendre(2 * (nloc-1) + 1)
 
     # Preallocate matrices
     φ = zeros(length(ξ), nloc)

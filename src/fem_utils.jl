@@ -11,7 +11,7 @@ function assemble_global_matrix(nodes::Vector{Float64}, elements::Matrix{Int}, m
     nloc, nelem = size(elements)
 
     # Precompute reference quadrature points and weights
-    ξ, ω = legendre_gauss_lobatto(nloc)
+    ξ, ω = legendre_gauss_lobatto(nloc+1)
 
     # Preallocate storage. I, J and V form triplets (row,col,value) for a sparse matrix.
     I = Int[]

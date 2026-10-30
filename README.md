@@ -10,7 +10,15 @@
 
 Running `main.jl` creates a spatial mesh using `mesh_generator.jl` with the chosen parameters. This also provides a time discretization for $(0,T]$. Then `main.jl` solves the GPE with $\beta=-2$ and a particular initial condition with known analytical solution, providing a `.jld` file with the approximate solution at $t=T$, along with the values of the discretized energy and mass. 
 
+## Testing
+
+Install the dependencies once, then run the regression suite:
+
+```sh
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+julia --project=. test/runtests.jl
+```
+
 ## References
 <a id="1">[1]</a>
 S. Becher, G. Matthies, and D. Wenzel (2018). *Variational methods for stable time discretization of first-order differential equations*. doi: https://www.researchgate.net/publication/322821295_Variational_methods_for_stable_time_discretization_of_first-order_differential_equations
-

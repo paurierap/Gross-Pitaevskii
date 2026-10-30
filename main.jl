@@ -13,7 +13,7 @@ u(0, x) = (8 * (9*exp(-4*x) + 16*exp(4*x)) - 32*(4*exp(-2*x) + 9*exp(2*x)))/(-12
 Provided that u(0, x) shows asymptotic behaviour at ±∞ towards 0, the BC's can be enforced much closer to the origin.
 
 This problem has the analytical solution: 
-u(x, t) = (8*exp(4it) * (9*exp(-4*x) + 16*exp(4*x)) - 32*exp(16it) * (4*exp(-2*x) + 9*exp(2*x)))/(-128 * cos(t) + 4*exp(-6*x) + 16*exp(6*x) +81*exp(-2*x) +64*exp.(2*x))
+u(x, t) = (8*exp(4it) * (9*exp(-4*x) + 16*exp(4*x)) - 32*exp(16it) * (4*exp(-2*x) + 9*exp(2*x)))/(-128 * cos(12t) + 4*exp(-6*x) + 16*exp(6*x) +81*exp(-2*x) +64*exp.(2*x))
 
 From here, we see that the mass and energy of the system are, respectively:
 - M[u] = ∫ |u|² dx = 12,
@@ -24,7 +24,7 @@ From here, we see that the mass and energy of the system are, respectively:
 ##### Include dependencies and utils #####
 ##########################################
 
-using LinearAlgebra, SparseArrays, JLD, IterativeSolvers
+using LinearAlgebra, SparseArrays, JLD
 include("src/LoadCode.jl")
 
 #############################
@@ -47,7 +47,7 @@ const r = 1
 ###################################
 
 # Compute mesh and time intervals:
-nodes, elements, _ , time_intervals = generate_mesh_1D(left_boundary, right_boundary, Nx, t_start, t_end, Nt, spacing=:chebyshev)
+nodes, elements, _ , time_intervals = generate_mesh_1D(left_boundary, right_boundary, Nx, t_start, t_end, Nt; d=d, spacing=:chebyshev)
 
 # Apply Dirichlet boundary conditions:
 ndofs = length(nodes) - 2
@@ -70,4 +70,6 @@ u0 = complex(float((8*(9*exp.(-4*x)+16*exp.(4*x))-32*(4*exp.(-2*x)+9*exp.(2*x)))
 # Start time integration
 u, mass, energy = Gr(M, S, time_intervals, u0, nodes, elements, mesh_to_space_map,ndofs, k, r, β)
 
-save("solution_file_"*string(Nx)*"x"*string(Nt)*"_k"*string(k)*"_r"*string(r)*"_P"*string(size(Simplices,1)-1)*"_T"*string(int(t_end))*".jld","u", u, "mass",mass, "energy", energy)
+filename = "solution_file_$(Nx)x$(Nt)_k$(k)_r$(r)_P$(d)_T$(t_end).jld"
+save(filename, "u", u, "mass", mass, "energy", energy, "nodes", nodes,
+     "elements", elements, "time_intervals", time_intervals)

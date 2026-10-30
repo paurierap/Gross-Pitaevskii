@@ -9,6 +9,20 @@ struct QuadratureRule
 end
 
 """
+    gauss_legendre(n)
+
+Return an n-point Gaussian rule on [-1,1], exact through degree 2n-1.
+The symmetric tridiagonal eigenproblem is the Golub–Welsch construction.
+"""
+function gauss_legendre(n::Int)
+    @assert n > 0
+    n == 1 && return [0.0], [2.0]
+    offdiag = Float64[j / sqrt(4j^2-1) for j in 1:(n-1)]
+    F = eigen(SymTridiagonal(zeros(n), offdiag))
+    return F.values, 2 .* F.vectors[1,:].^2
+end
+
+"""
     Quad_5 :: QuadratureRule
 
 Gaussian quadrature rule with 5 integration points on the interval `[-1, 1]`.
@@ -56,9 +70,9 @@ const Quad_9 = QuadratureRule(
     legendre_gauss_lobatto(k::Integer) -> x::Vector{Float64}, w::Vector{Float64}
 
 Compute the Legendre–Gauss–Lobatto (LGL) quadrature nodes and weights
-for a polynomial of degree `k`. The resulting rule integrates exactly all
-polynomials of degree ≤ `2k−3` over the interval `[-1, 1]`, and includes
-both endpoints `x₁ = -1` and `xₙ = 1`.
+for a polynomial of degree `k`. The resulting `k+1`-point rule integrates
+exactly all polynomials of degree ≤ `2k−1` over the interval `[-1, 1]`, and
+includes both endpoints `x₁ = -1` and `xₙ = 1`.
 
 # Arguments
 - `k::Integer`: Polynomial degree (`k+1` total nodes).

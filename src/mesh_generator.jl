@@ -21,13 +21,19 @@ The order of the FEM discretization `d` directly influences the number of nodes,
 """
 function generate_mesh_1D(x_left::Float64, x_right::Float64, Nx::Int, t_start::Float64, t_end::Float64, Nt::Int; d::Int=1, spacing::Symbol=:uniform)
 
-    N_nodes = Nx * d + 1
+    @assert x_left < x_right "Spatial endpoints must be increasing."
+    @assert t_start < t_end "Time endpoints must be increasing."
+    @assert Nx > 0 && Nt > 0 && d > 0 "Mesh counts and FEM degree must be positive."
+    @assert spacing in (:uniform, :chebyshev) "Unknown mesh spacing."
 
-    if spacing == :chebyshev
-        nodes = chebyshev_center_nodes(x_left, x_right, N_nodes)
-    else
-        nodes = collect(LinRange(x_left, x_right, N_nodes))
+    # Subdivide each physical element into d equal parts.
+    vertices = spacing == :chebyshev ? chebyshev_center_nodes(x_left, x_right, Nx + 1) :
+               collect(LinRange(x_left, x_right, Nx + 1))
+    nodes = Vector{Float64}(undef, Nx * d + 1)
+    for el in 1:Nx, j in 0:(d-1)
+        nodes[(el-1)*d+j+1] = vertices[el] + (j/d)*(vertices[el+1]-vertices[el])
     end
+    nodes[end] = x_right
 
     elements = zeros(Int, d+1, Nx) 
     for element = 1:Nx  
@@ -44,24 +50,19 @@ end
 """
     chebyshev_center_nodes(x_left::Float64, x_right::Float64, N::Int)
 
-Generate `N` Chebyshev-type nodes in `[x_left, x_right]` that are denser
+Generate `N` cosine-spaced nodes in `[x_left, x_right]` that are denser
 toward the **center** of the interval (as opposed to standard Chebyshev
 nodes, which are denser near the boundaries).
 
-The algorithm builds two mirrored Chebyshev half-domains and keeps
-only the nodes within `[x_left, x_right]`.
+The mapping `±(1 - cos(π|s|/2))`, with `s` uniformly spaced in `[-1, 1]`,
+preserves both endpoints and is symmetric about the midpoint.
 """
 function chebyshev_center_nodes(x_left::Float64, x_right::Float64, N::Int)
-    aL = (3 * x_left - x_right) * 0.5
-    bL = (x_left + x_right) * 0.5
-    aR = bL
-    bR = (3 * x_right - x_left) * 0.5
-
-    nodes_left = 0.5 .* ((bL - aL) .* cos.(π .* (N/2:-1:0) ./ N) .+ aL .+ bL)
-    nodes_right = 0.5 .* ((bR - aR) .* cos.(π .* (N-1:-1:N/2) ./ N) .+ aR .+ bR)
-
-    nodes = vcat(nodes_left, nodes_right)
-    nodes = filter(x -> x ≥ x_left && x ≤ x_right, nodes)
-    
+    @assert N ≥ 2 && x_left < x_right
+    midpoint = (x_left + x_right) / 2
+    radius = (x_right - x_left) / 2
+    s = range(-1.0, 1.0; length=N)
+    nodes = [midpoint + sign(z)*radius*(1-cospi(z/2)) for z in s]
+    nodes[1], nodes[end] = x_left, x_right
     return nodes
 end

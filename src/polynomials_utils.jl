@@ -47,16 +47,13 @@ such that `L[k, j] = L_j(x_eval[k])`.
 function lagrange_matrix(nodes::Vector{Float64}, x_eval::Vector{Float64})
     nloc = length(nodes)
 
-    # Build Vandermonde matrix for polynomial basis
-    V = ones(nloc, nloc)
-    X = ones(length(x_eval), nloc)
-    for j = 2:nloc
-        V[:, j] = nodes .^ (j-1)
-        X[:, j] = x_eval .^ (j-1)
+    # Product form avoids an ill-conditioned physical-coordinate Vandermonde solve.
+    L = ones(length(x_eval), nloc)
+    for j in 1:nloc, m in 1:nloc
+        j == m && continue
+        @views L[:,j] .*= (x_eval .- nodes[m]) ./ (nodes[j]-nodes[m])
     end
-
-    # Compute Lagrange basis functions at quadrature points: φ(q,:) = X * inv(V)
-    return X * (V \ I(nloc))
+    return L
 end
 
 """
@@ -123,9 +120,9 @@ The scaling from `[-1, 1]` to `[-τ/2, τ/2]` is included through the factor `(2
 function legendre_derivative_endpoint(q::Int64, s::Int64, τ::Float64; side::Symbol = :right)
     @assert s ≥ 0 "Polynomial order s must be non-negative."
     @assert q ≥ 0 "Derivative order q must be non-negative."
-    @assert s ≥ q "Derivative order q cannot exceed polynomial degree s."
     @assert τ > 0 "Interval length τ must be positive."
     @assert side in (:left, :right) "Side must be :left or :right."
+    q > s && return 0.0
 
     prefactor = sqrt((2s + 1) / τ) * (2 / τ)^q * derivative_factor(q) * binomial(s + q, s - q)
 
